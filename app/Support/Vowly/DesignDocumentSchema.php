@@ -152,9 +152,18 @@ final class DesignDocumentSchema
             return;
         }
 
-        self::keys($grid, ['id', 'type', 'columns', 'gap', 'stackAt'], $path, $errors);
+        $allowedKeys = ['id', 'type', 'columns', 'gap', 'stackAt'];
+        if (array_key_exists('layout', $grid)) {
+            $allowedKeys[] = 'layout';
+        }
+
+        self::keys($grid, $allowedKeys, $path, $errors);
         self::id($grid['id'] ?? null, $path.'.id', $errors, $ids);
         self::enum($grid['type'] ?? null, ['grid'], $path.'.type', $errors);
+
+        if (array_key_exists('layout', $grid)) {
+            self::enum($grid['layout'], ['stack', 'grid'], $path.'.layout', $errors);
+        }
 
         if (! is_int($grid['columns'] ?? null) || ! in_array($grid['columns'], [1, 2, 3], true)) {
             self::error($errors, $path.'.columns', 'Grid columns must be 1, 2, or 3.');
@@ -205,7 +214,7 @@ final class DesignDocumentSchema
             self::id($block['id'] ?? null, $path.'.id', $errors, $ids);
             self::string($block['label'] ?? null, $path.'.label', 120, $errors);
             self::string($block['text'] ?? null, $path.'.text', 120, $errors);
-            self::string($block['href'] ?? null, $path.'.href', 2048, $errors);
+            self::url($block['href'] ?? null, $path.'.href', $errors);
 
             return;
         }
@@ -305,6 +314,28 @@ final class DesignDocumentSchema
         }
 
         self::string($value, $path, $max, $errors);
+    }
+
+    /**
+     * Validate an approved HTTP(S) destination.
+     *
+     * @param  array<string, list<string>>  $errors
+     */
+    private static function url(mixed $value, string $path, array &$errors): void
+    {
+        self::string($value, $path, 2048, $errors);
+
+        if (! is_string($value)) {
+            return;
+        }
+
+        $parts = parse_url($value);
+        $scheme = is_array($parts) ? strtolower((string) ($parts['scheme'] ?? '')) : '';
+        $host = is_array($parts) ? ($parts['host'] ?? null) : null;
+
+        if (! in_array($scheme, ['http', 'https'], true) || ! is_string($host) || $host === '' || filter_var($value, FILTER_VALIDATE_URL) === false) {
+            self::error($errors, $path, 'Button destinations must be valid HTTP or HTTPS URLs.');
+        }
     }
 
     /**

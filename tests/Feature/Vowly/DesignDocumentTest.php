@@ -16,13 +16,13 @@ test('owners can save and load a valid versioned design document', function () {
         ['document' => $document],
     );
 
-    $response->assertRedirect(route('vowly.invitations.show', $invitation));
+    $response->assertRedirect(route('vowly.invitations.designs.editor', [$invitation, $design]));
     expect($design->fresh()->document)->toEqual($document);
 
     $this->actingAs($user)
-        ->get(route('vowly.invitations.show', $invitation))
+        ->get(route('vowly.invitations.designs.editor', [$invitation, $design]))
         ->assertInertia(fn (Assert $page) => $page
-            ->component('invitations/show')
+            ->component('invitations/editor')
             ->where('invitation.activeDesign.document', $document)
         );
 });
@@ -206,7 +206,7 @@ function vowlyDocumentFixture(): array
                                 'type' => 'button',
                                 'label' => 'Open details',
                                 'text' => 'See details',
-                                'href' => '#details',
+                                'href' => 'https://example.com/details',
                             ],
                         ],
                     ],

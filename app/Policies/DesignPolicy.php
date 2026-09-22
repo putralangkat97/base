@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Design;
+use App\Models\DesignMedia;
 use App\Models\Invitation;
 use App\Models\User;
 
@@ -40,6 +41,30 @@ class DesignPolicy
         return $this->update($user, $design)
             && $design->is_active
             && $design->archived_at === null;
+    }
+
+    /**
+     * Determine whether the user can upload private media to the design.
+     */
+    public function uploadMedia(User $user, Design $design): bool
+    {
+        return $this->save($user, $design);
+    }
+
+    /**
+     * Determine whether the user can view private media.
+     */
+    public function viewMedia(User $user, DesignMedia $media): bool
+    {
+        return $user->is($media->design->invitation->user);
+    }
+
+    /**
+     * Determine whether the user can view the private preview.
+     */
+    public function preview(User $user, Design $design): bool
+    {
+        return $this->save($user, $design);
     }
 
     /**

@@ -24,6 +24,7 @@ import {
     restore,
     switchMethod,
 } from '@/routes/vowly/invitations/designs';
+import { editor } from '@/routes/vowly/invitations/designs';
 import type { DesignSummary, InvitationWorkspace } from '@/types';
 
 type Props = {
@@ -197,12 +198,26 @@ export default function InvitationsShow({ invitation }: Props) {
                                 active at a time.
                             </p>
                         </div>
-                        <DesignNameDialog invitationId={invitation.id}>
-                            <Button>
-                                <Plus />
-                                New design
-                            </Button>
-                        </DesignNameDialog>
+                        <div className="flex flex-wrap gap-2">
+                            {invitation.activeDesignId !== null && (
+                                <Button asChild variant="outline">
+                                    <Link
+                                        href={editor({
+                                            invitation: invitation.id,
+                                            design: invitation.activeDesignId,
+                                        })}
+                                    >
+                                        Open editor
+                                    </Link>
+                                </Button>
+                            )}
+                            <DesignNameDialog invitationId={invitation.id}>
+                                <Button>
+                                    <Plus />
+                                    New design
+                                </Button>
+                            </DesignNameDialog>
+                        </div>
                     </div>
                 </div>
 

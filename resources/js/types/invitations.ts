@@ -19,4 +19,20 @@ export type InvitationWorkspace = {
     name: string;
     activeDesignId: number | null;
     designs: DesignSummary[];
+    activeDesign?: DesignWorkspace | null;
 };
+
+export type DesignWorkspace = {
+    id: number;
+    name: string;
+    document: DesignDocument;
+};
+
+export type EditorWorkspace = {
+    id: number;
+    name: string;
+    designs: DesignSummary[];
+    activeDesign: DesignWorkspace;
+    media: DesignMedia[];
+};
+import type { DesignDocument, DesignMedia } from './design-document';

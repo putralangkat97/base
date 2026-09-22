@@ -13,9 +13,9 @@ class ValidDesignDocument implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        foreach (DesignDocumentSchema::validate($value) as $messages) {
+        foreach (DesignDocumentSchema::validate($value) as $path => $messages) {
             foreach ($messages as $message) {
-                $fail($message);
+                $fail($path.': '.$message);
             }
         }
     }

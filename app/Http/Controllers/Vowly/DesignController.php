@@ -75,7 +75,7 @@ class DesignController extends Controller
             'message' => __('Design saved.'),
         ]);
 
-        return to_route('vowly.invitations.show', $invitation);
+        return to_route('vowly.invitations.designs.editor', [$invitation, $design]);
     }
 
     /**
