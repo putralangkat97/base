@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Design;
 use App\Models\Invitation;
+use App\Support\Vowly\DesignDocumentSchema;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,6 +24,7 @@ class DesignFactory extends Factory
             'name' => fake()->unique()->words(2, true),
             'is_active' => false,
             'archived_at' => null,
+            'document' => DesignDocumentSchema::empty(),
         ];
     }
 

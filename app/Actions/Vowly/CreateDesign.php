@@ -4,6 +4,7 @@ namespace App\Actions\Vowly;
 
 use App\Models\Design;
 use App\Models\Invitation;
+use App\Support\Vowly\DesignDocumentSchema;
 
 class CreateDesign
 {
@@ -15,6 +16,7 @@ class CreateDesign
         return $invitation->designs()->create([
             'name' => $name,
             'is_active' => false,
+            'document' => DesignDocumentSchema::empty(),
         ]);
     }
 }

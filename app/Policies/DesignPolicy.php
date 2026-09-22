@@ -33,6 +33,16 @@ class DesignPolicy
     }
 
     /**
+     * Determine whether the user can save the design document.
+     */
+    public function save(User $user, Design $design): bool
+    {
+        return $this->update($user, $design)
+            && $design->is_active
+            && $design->archived_at === null;
+    }
+
+    /**
      * Determine whether the user can switch to the design.
      */
     public function activate(User $user, Design $design): bool

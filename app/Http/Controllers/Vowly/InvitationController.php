@@ -70,11 +70,18 @@ class InvitationController extends Controller
                 ->orderBy('name'),
         ]);
 
+        $activeDesign = $invitation->designs->firstWhere('is_active', true);
+
         return Inertia::render('invitations/show', [
             'invitation' => [
                 'id' => $invitation->id,
                 'name' => $invitation->name,
-                'activeDesignId' => $invitation->designs->firstWhere('is_active', true)?->id,
+                'activeDesignId' => $activeDesign?->id,
+                'activeDesign' => $activeDesign === null ? null : [
+                    'id' => $activeDesign->id,
+                    'name' => $activeDesign->name,
+                    'document' => $activeDesign->document,
+                ],
                 'designs' => $invitation->designs
                     ->map(fn ($design): array => [
                         'id' => $design->id,

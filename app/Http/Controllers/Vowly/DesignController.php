@@ -6,10 +6,12 @@ use App\Actions\Vowly\ArchiveDesign;
 use App\Actions\Vowly\CreateDesign;
 use App\Actions\Vowly\DeleteDesign;
 use App\Actions\Vowly\RestoreDesign;
+use App\Actions\Vowly\SaveDesignDocument;
 use App\Actions\Vowly\SwitchDesign;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Vowly\CreateDesignRequest;
 use App\Http\Requests\Vowly\RenameDesignRequest;
+use App\Http\Requests\Vowly\SaveDesignDocumentRequest;
 use App\Models\Design;
 use App\Models\Invitation;
 use DomainException;
@@ -50,6 +52,27 @@ class DesignController extends Controller
         Inertia::flash('toast', [
             'type' => 'success',
             'message' => __('Design renamed.'),
+        ]);
+
+        return to_route('vowly.invitations.show', $invitation);
+    }
+
+    /**
+     * Validate and save the active design document.
+     */
+    public function updateDocument(
+        SaveDesignDocumentRequest $request,
+        Invitation $invitation,
+        Design $design,
+        SaveDesignDocument $saveDesignDocument,
+    ): RedirectResponse {
+        /** @var array<string, mixed> $document */
+        $document = $request->validated('document');
+        $saveDesignDocument->handle($design, $document);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Design saved.'),
         ]);
 
         return to_route('vowly.invitations.show', $invitation);

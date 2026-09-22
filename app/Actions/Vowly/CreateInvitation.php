@@ -4,6 +4,7 @@ namespace App\Actions\Vowly;
 
 use App\Models\Invitation;
 use App\Models\User;
+use App\Support\Vowly\DesignDocumentSchema;
 use Illuminate\Support\Facades\DB;
 
 class CreateInvitation
@@ -21,6 +22,7 @@ class CreateInvitation
             $invitation->designs()->create([
                 'name' => 'Untitled design',
                 'is_active' => true,
+                'document' => DesignDocumentSchema::empty(),
             ]);
 
             return $invitation->load('activeDesign');

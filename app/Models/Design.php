@@ -15,11 +15,12 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property bool $is_active
  * @property Carbon|null $archived_at
+ * @property array<string, mixed>|null $document
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Invitation $invitation
  */
-#[Fillable(['invitation_id', 'name', 'is_active', 'archived_at'])]
+#[Fillable(['invitation_id', 'name', 'is_active', 'archived_at', 'document'])]
 class Design extends Model
 {
     /** @use HasFactory<DesignFactory> */
@@ -46,6 +47,7 @@ class Design extends Model
         return [
             'is_active' => 'boolean',
             'archived_at' => 'datetime',
+            'document' => 'array',
         ];
     }
 }

@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{invitation}', [InvitationController::class, 'show'])->name('show');
             Route::post('/{invitation}/designs', [DesignController::class, 'store'])->name('designs.store');
             Route::patch('/{invitation}/designs/{design}', [DesignController::class, 'update'])->name('designs.update');
+            Route::patch('/{invitation}/designs/{design}/document', [DesignController::class, 'updateDocument'])->name('designs.document.update');
             Route::post('/{invitation}/designs/{design}/activate', [DesignController::class, 'activate'])->name('designs.switch');
             Route::post('/{invitation}/designs/{design}/archive', [DesignController::class, 'archive'])->name('designs.archive');
             Route::post('/{invitation}/designs/{design}/restore', [DesignController::class, 'restore'])->name('designs.restore');
