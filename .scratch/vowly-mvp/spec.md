@@ -1,330 +1,409 @@
 Status: ready-for-agent
 
-# Vowly MVP implementation spec
+# Vowly MVP — Visual Invitation Builder
 
 ## Problem Statement
 
-Couples in Indonesia need a premium, personalized wedding Invitation that is easy to compose, publish, share, and operate without combining generic website tools with spreadsheets. Existing tools often make the visual result, guest identity, RSVP collection, payment, and hosting lifecycle separate problems.
+Couples in Indonesia need a way to create a polished, personalized wedding Invitation without hiring a designer or assembling a website from generic tools. The current baseline is too close to a constrained content form: it does not capture the intended experience of directly designing an Invitation by adding Sections, arranging Content blocks, managing Grid layouts, applying animation, adding music, and placing forms.
 
-Vowly must validate one focused proposition: couples will pay once for a polished, mobile-first wedding Invitation that makes guest sharing and RSVP management simpler than generic website tools and spreadsheets.
+Vowly must validate a focused proposition: an Owner can visually compose and publish a premium, mobile-first wedding Invitation from a controlled component library, while the resulting public page remains responsive, accessible, secure, and easy to operate.
 
-The initial product also needs to serve small invitation studios without creating a separate studio workspace or role. A studio uses a normal User/Owner account.
+Payment is not part of this MVP. Publication is available without Midtrans, Payment records, or Hosting entitlements. Commercial payment and hosting rules are future work.
 
 ## Solution
 
-Build Vowly as a Laravel modular monolith with PostgreSQL, Redis, object storage/CDN, and Docker Compose deployment on a VPS.
+Build Vowly as a Laravel modular monolith with a React-based visual editor.
 
-The launch product is `Vowly Publish — 1 Year`: one Invitation with one year of hosting, four production templates, a constrained visual editor, responsive previews, guest operations, Personalized links, event-level RSVP, Guestbook moderation, display-only QRIS/bank details, CSV import/export, and a verified Midtrans payment flow.
+The MVP provides an Owner with a one-page Invitation canvas. The Owner adds and arranges ordered Sections, Containers, Grid layouts, and typed Content blocks. The Owner can edit content and design properties, apply curated Animation presets, add one Music track, and configure fixed Form blocks such as RSVP and Guestbook.
 
-The editor is visual and hierarchical rather than a freeform Figma canvas. An Owner adds and configures top-level Sections, adds typed Content blocks inside them, uses responsive Grid presets, applies curated Animation presets, and previews the same structured Invitation at mobile, tablet, and desktop sizes. The same serialized document is the source for authenticated preview and public rendering.
+The editor, authenticated Preview, and public renderer consume the same versioned serialized Invitation design document. Draft changes are mutable and autosaved. Publication creates an immutable Published invitation version. Public rendering uses only that Published invitation version.
 
-The public canonical URL is `https://vowly.id/i/{slug}`. A public Invitation is available only when its visibility is `published`, its Hosting entitlement is active, its hosting end is in the future, and it has a Published invitation version. Payment never publishes automatically.
+The editor should feel Figma-like through direct selection, insertion, movement, duplication, deletion, property editing, and viewport Preview. The MVP deliberately uses structured responsive layout rather than a freeform coordinate canvas.
 
 ## User Stories
 
-### Account and ownership
+### User and Invitation workspace
 
 1. As a new User, I want to register with email and password, so that I can create an Invitation.
-2. As a User, I want to verify my email address, so that Vowly can trust the identity used for checkout and publication.
+2. As a User, I want to log in and log out, so that I can protect my Drafts and operational data.
 3. As a User, I want to reset my password, so that I can recover access without support intervention.
-4. As an unverified User, I want to create and edit a draft, so that I can explore Vowly before committing to payment.
-5. As an unverified User, I want to preview my draft privately, so that I can evaluate the product before verification.
-6. As a User, I want to own multiple Invitations, so that separate weddings or draft experiments do not share publication state.
-7. As an Owner, I want to see which Invitations I own, so that I can manage each wedding separately.
-8. As an Owner, I want to remain the only active customer editor in MVP, so that ownership and support behavior stay unambiguous.
-9. As an Owner, I want my Invitation to be separate from the Vowly Admin role, so that support access is controlled and audited.
-10. As an Admin, I want audited support access, so that I can resolve operational issues without becoming an invisible owner.
+4. As a User, I want to verify my email address, so that Vowly can trust the identity used for publication.
+5. As an unverified User, I want to create and edit a Draft, so that I can explore the product before verification.
+6. As an Owner, I want to own multiple Invitations, so that separate weddings or experiments do not share publication state.
+7. As an Owner, I want to see my Invitations in a workspace, so that I can choose which design to edit.
+8. As an Owner, I want to create an Invitation with a stable internal identity, so that Draft, media, Events, Guests, and publication remain scoped correctly.
+9. As an Owner, I want to choose a slug before publication, so that I can prepare the public URL.
+10. As an Owner, I want to change a Draft-only slug, so that I can correct it before sharing.
+11. As an Owner, I want the slug to remain fixed after first publication, so that shared links do not silently break.
+12. As an Owner, I want a studio to use a normal Owner identity, so that the MVP does not introduce a separate studio role.
 
-### Invitation creation and templates
+### Visual editor shell
 
-11. As an Owner, I want to create an Invitation from a template, so that I can begin with a polished wedding design.
-12. As an Owner, I want to browse four launch templates, so that I can choose a visual direction without an overwhelming catalog.
-13. As an Owner, I want an Invitation to have a stable slug before first publication, so that I can prepare and share the eventual URL.
-14. As an Owner, I want to change a draft slug, so that I can correct or improve it before sharing.
-15. As an Owner, I want my slug to remain fixed after first publication, so that shared links do not silently break.
-16. As an Owner, I want to change templates after starting an Invitation, so that I can refine the visual direction without losing global data.
-17. As an Owner, I want template changes to transform only the draft, so that the current public Invitation remains stable until I review it.
-18. As an Owner, I want to see every transformed, unsupported, or omitted item after a template change, so that content is never silently lost.
-19. As an Admin, I want to activate or deactivate templates, so that the catalog can be operated without a visual template-builder product.
-20. As an Owner with an existing Invitation, I want a deactivated template to keep rendering, so that an Admin catalog change does not break my published Invitation.
+13. As an Owner, I want to open a visual editor for an Invitation, so that I can compose the result directly.
+14. As an Owner, I want to see the Invitation canvas, so that I understand the page structure while editing.
+15. As an Owner, I want to see a Section and block outline, so that I can navigate the document without searching visually.
+16. As an Owner, I want to select a Section or Content block, so that I can edit its properties.
+17. As an Owner, I want the selected item to be visibly highlighted, so that I know which item a property change affects.
+18. As an Owner, I want to add a Section from the approved Section library, so that I can extend the Invitation.
+19. As an Owner, I want to insert a Section before or after another Section, so that I can control the story order.
+20. As an Owner, I want to move a Section up or down, so that reordering does not depend on dragging.
+21. As an Owner, I want to drag a Section to a new location, so that visual arrangement feels direct.
+22. As an Owner, I want to duplicate a Section, so that I can reuse a composition quickly.
+23. As an Owner, I want to hide a Section without deleting its content, so that I can experiment safely.
+24. As an Owner, I want to delete a Section from the Draft presentation, so that the Invitation does not contain unwanted content.
+25. As an Owner, I want to restore a removed Section when its data was retained, so that deletion is not unnecessarily destructive.
+26. As an Owner, I want Section and block limits to be visible, so that I understand why an insertion may be unavailable.
+27. As an Owner, I want editor actions to be keyboard accessible, so that I can compose without relying on a pointer.
+28. As an assistive-technology user, I want movement actions announced meaningfully, so that I understand how the document order changed.
+29. As an Owner, I want the editor to preserve selection when safe, so that normal edits do not interrupt my work.
+30. As an Owner, I want invalid or unsupported content to show a clear error state, so that I can correct it before publication.
 
-### Visual editor
+### Design document and Content blocks
 
-21. As an Owner, I want to open a visual editor for my draft, so that I can compose the Invitation from the result I see.
-22. As an Owner, I want to add a top-level Section from a curated library, so that I can build the Invitation incrementally.
-23. As an Owner, I want to add a Content block inside a Section, so that each part of the Invitation has an intentional structure.
-24. As an Owner, I want to add text, image, quote, button/link, and divider blocks, so that I can express the core invitation content.
-25. As an Owner, I want to add a responsive Grid block, so that I can arrange related content in columns without writing layout code.
-26. As an Owner, I want Grid blocks to reflow on mobile, so that a desktop composition remains usable on small screens.
-27. As an Owner, I want to choose from constrained Grid presets, so that layout remains predictable and accessible.
-28. As an Owner, I want to apply a curated Animation preset to an eligible Section or Content block, so that the Invitation feels polished.
-29. As a visitor who prefers reduced motion, I want animations to respect my system preference, so that the Invitation remains comfortable and usable.
-30. As an Owner, I want to configure content without arbitrary HTML, CSS, JavaScript, iframe, or embed fields, so that the published document remains safe and maintainable.
-31. As an Owner, I want to reorder Sections, so that the Invitation follows the story I intend.
-32. As an Owner, I want Move Up, Move Down, Insert Before, and Insert After actions, so that reordering does not depend on dragging.
-33. As an Owner, I want to duplicate a Section or eligible block, so that I can build repeated content quickly.
-34. As an Owner, I want to hide a Section without deleting its data, so that I can try variations safely.
-35. As an Owner, I want to remove a Section from the draft presentation without deleting its underlying data, so that I can restore it later.
-36. As an Owner, I want Section and block limits enforced, so that an Invitation remains performant and understandable.
-37. As an Owner, I want keyboard-accessible editor actions, so that I can compose without a pointer.
-38. As an assistive-technology user, I want meaningful announcements when an item moves, so that I understand changes to the document order.
-39. As an Owner, I want draft changes to autosave, so that I do not lose work during normal editing.
-40. As an Owner editing in two tabs, I want a visible revision conflict, so that one tab never silently overwrites another.
-41. As an Owner, I want to preview the same draft at mobile, tablet, and desktop viewports, so that I can catch responsive problems before publication.
-42. As an Owner, I want preview to be authenticated and private, so that unfinished content is not publicly shareable.
-43. As an Owner, I want clear validation feedback for invalid blocks or missing data, so that I can fix the draft before publication.
-44. As an Owner, I want transformed content to require review before republishing, so that template changes remain deliberate.
+31. As an Owner, I want the editor to represent the Invitation as a structured design document, so that the same content can render consistently in Preview and public pages.
+32. As an Owner, I want every Section and Content block to have a stable identity, so that movement and editing do not lose content.
+33. As an Owner, I want to add a Heading block, so that I can introduce a part of the Invitation.
+34. As an Owner, I want to add a Text block, so that I can write invitation copy.
+35. As an Owner, I want limited rich text such as bold, italic, links, and line breaks, so that text remains expressive without arbitrary markup.
+36. As an Owner, I want to add an Image block, so that I can include personal media.
+37. As an Owner, I want to add a Button or Link block, so that visitors can navigate to an external destination or an Invitation section.
+38. As an Owner, I want to add a Quote block, so that I can include a meaningful quotation.
+39. As an Owner, I want to add a Divider block, so that I can separate visual content.
+40. As an Owner, I want to add a Countdown block, so that visitors can see time remaining until the Primary event.
+41. As an Owner, I want to add a Gallery block, so that visitors can view selected images.
+42. As an Owner, I want to add a Couple block, so that the Invitation identifies the people being celebrated.
+43. As an Owner, I want to add an Event schedule block, so that visitors can understand the Events.
+44. As an Owner, I want to add a Navigation block, so that visitors can open an external map or navigation link.
+45. As an Owner, I want to add a Contact person block, so that visitors can contact people explicitly exposed by the Owner.
+46. As an Owner, I want to add an RSVP Form block, so that visitors can respond to Events.
+47. As an Owner, I want to add a Guestbook block, so that visitors can leave moderated messages.
+48. As an Owner, I want to add a Gifts block, so that visitors can see display-only QRIS and bank details.
+49. As an Owner, I want the block library to prevent unsupported nested combinations, so that the document remains renderable.
+50. As an Owner, I want to duplicate an eligible Content block, so that I can repeat content efficiently.
+51. As an Owner, I want to move an eligible Content block within its Container or Grid, so that I can adjust composition.
+52. As an Owner, I want to remove a Content block without corrupting its Section, so that local edits remain safe.
+53. As an Owner, I want block-specific validation, so that missing required values are caught before publication.
 
-### Couple, event, and regional content
+### Containers, Grid, and responsive layout
 
-45. As an Owner, I want to enter the couple identity, so that the Invitation identifies the people being celebrated.
-46. As an Owner, I want to create multiple Events such as a ceremony and reception, so that different occasions can have different RSVP responses.
-47. As an Owner, I want exactly one active Primary event, so that the Invitation has an unambiguous main occasion.
-48. As an Owner, I want the Primary event to provide the minimum publishable title, date, and time, so that public visitors understand when the main occasion occurs.
-49. As an Owner, I want each Event to have its own local time zone, so that dates and countdowns are correct across WIB, WITA, and WIT.
-50. As an Owner, I want to archive an Event with existing responses, so that schedule changes do not destroy RSVP history.
-51. As a visitor, I want event schedules, countdowns, and venue details to use the Event's local time, so that I do not misread the occasion.
-52. As an Owner, I want to provide an external Navigation link, so that guests can open their preferred map application without Vowly embedding a map provider.
-53. As an Owner, I want to expose selected Contact persons, so that guests know whom to contact without revealing private Guest data.
-54. As an Indonesian visitor, I want customer-facing copy and formatting in `id-ID`, so that the Invitation feels native to the launch market.
-55. As an Owner, I want the product to be translation-ready, so that future English support does not require changing the domain model.
+54. As an Owner, I want to add a Container inside a Section, so that related blocks have a layout boundary.
+55. As an Owner, I want to add a Grid layout, so that I can arrange related blocks into columns.
+56. As an Owner, I want one-, two-, and three-column Grid presets, so that layout remains predictable.
+57. As an Owner, I want to control Grid gap, so that columns have appropriate visual separation.
+58. As an Owner, I want to control horizontal and vertical alignment, so that blocks line up intentionally.
+59. As an Owner, I want Grid columns to stack on mobile, so that desktop compositions remain usable on small screens.
+60. As an Owner, I want to preview the Grid at mobile, tablet, and desktop viewports, so that I can catch responsive problems.
+61. As an Owner, I want constrained responsive overrides, so that I can adjust important differences without maintaining three separate pages.
+62. As an Owner, I want the editor to show when a layout will stack, so that responsive behavior is understandable.
+63. As an Owner, I want unsupported block types rejected from a Grid, so that the renderer does not encounter invalid layout structures.
+64. As an Owner, I want Sections to have bounded depth, so that the document remains understandable and performant.
+65. As an Owner, I want the editor to prevent excessive Section and block counts, so that public pages remain affordable to render.
+66. As an Owner, I want layouts to work without custom CSS, so that Invitations remain safe and consistent.
 
-### Media and display-only gifts
+### Styles and visual settings
 
-56. As an Owner, I want to upload supported image formats, so that my Invitation can contain personal media.
-57. As an Owner, I want uploaded media stored outside the public web root with generated storage keys, so that filenames and storage internals are not exposed.
-58. As an Owner, I want image orientation normalized and metadata stripped, so that public media does not leak GPS or other EXIF information.
-59. As an Owner, I want generated responsive derivatives, so that public pages load appropriately on different devices.
-60. As an Owner, I want gallery and storage limits enforced, so that the product remains predictable and affordable to operate.
-61. As an Owner, I want media removed from a draft to remain available while an older Published invitation references it, so that editing cannot break the current public page.
-62. As an Owner, I want a Gallery section with a bounded image count, so that guests can view selected memories without an unbounded media library.
-63. As an Owner, I want to add one QRIS image and multiple bank-account entries, so that guests can see gift details.
-64. As a visitor, I want gifts to be display-only, so that Vowly never handles or reconciles my payment.
+67. As an Owner, I want to choose a template or visual starting point, so that I can begin with a polished composition.
+68. As an Owner, I want to change the visual starting point on a Draft, so that I can explore different directions before publication.
+69. As an Owner, I want template changes to preserve global Invitation data where possible, so that I do not re-enter the couple and Event details.
+70. As an Owner, I want template transformations to report changed, unsupported, or omitted content, so that no content disappears silently.
+71. As an Owner, I want to configure typography, so that the Invitation feels intentional.
+72. As an Owner, I want to configure text color and background color, so that the visual hierarchy is clear.
+73. As an Owner, I want to configure spacing and padding within approved limits, so that Sections have appropriate rhythm.
+74. As an Owner, I want to configure borders and corner treatment within approved limits, so that blocks can have visual distinction.
+75. As an Owner, I want to configure Section backgrounds, so that Sections can have different visual moods.
+76. As an Owner, I want design settings to use approved tokens and values, so that the Invitation remains accessible and maintainable.
+77. As an Owner, I want a readable default theme, so that I can create a usable Invitation without detailed design knowledge.
+78. As an Owner, I want style controls to show accessible contrast feedback where practical, so that text remains readable.
+79. As an Owner, I want the renderer to ignore unsupported style properties, so that unsafe or invalid values cannot reach the public page.
 
-### Publication and hosting
+### Animation and Music
 
-65. As an Owner, I want to save an editable Draft invitation, so that I can work before payment or publication.
-66. As an Owner, I want to pay for hosting without automatically publishing, so that I can decide when the Invitation is ready.
-67. As an Owner, I want payment verification to create a one-year Hosting entitlement, so that I know what I purchased.
-68. As an Owner, I want to review a paid draft and explicitly publish it, so that payment never accidentally exposes unfinished content.
-69. As an Owner, I want publication validation to require couple identity and one valid Primary event, so that essential public content is present.
-70. As an Owner, I want optional Sections to remain optional, so that I am not forced to add RSVP, Gallery, Gifts, or Guestbook content.
-71. As an Owner, I want a Published invitation to be immutable, so that a half-finished edit cannot leak to visitors.
-72. As an Owner, I want to keep editing a Draft while an older Published invitation is public, so that I can prepare the next version safely.
-73. As an Owner, I want a failed publication to leave the current Published invitation unchanged, so that a bad draft cannot take the site down.
-74. As an Owner, I want to unpublish at any time, so that I can temporarily remove the public Invitation.
-75. As an Owner, I want unpublishing to preserve my Draft, Published version, Guests, RSVPs, and media, so that visibility changes are reversible.
-76. As an Owner, I want unpublishing not to pause hosting time, so that the one-year product has predictable commercial semantics.
-77. As an Owner, I want an expired Invitation to become unavailable publicly while my data remains retained, so that I can renew or export it later.
-78. As an Owner, I want to renew before expiry without losing paid time, so that early renewal is not penalized.
-79. As an Owner, I want a renewal after expiry to start when payment is verified, so that reactivation has a clear start date.
-80. As a visitor, I want every unavailable Invitation to show a neutral response, so that unpublish, expiry, deletion, and suspension do not expose internal state.
-81. As an Owner, I want to delete an Invitation into a 30-day recovery period, so that accidental deletion is recoverable.
-82. As an Owner, I want recovery to preserve the original entitlement end date, so that recovery does not grant unpriced hosting time.
-83. As an Owner, I want permanent deletion after recovery to remove customer-facing data, so that deletion has a meaningful privacy effect.
+80. As an Owner, I want to apply an Animation preset to an eligible Section or Content block, so that the Invitation feels polished.
+81. As an Owner, I want to choose no animation, fade, or slide/reveal behavior, so that animation remains simple.
+82. As a visitor who prefers reduced motion, I want animations to be reduced or removed, so that the Invitation remains comfortable.
+83. As an Owner, I want an animation Preview, so that I understand the effect before publishing.
+84. As an Owner, I want to add one Music track to an Invitation, so that the page can include an audio atmosphere.
+85. As an Owner, I want to upload or choose an approved audio track, so that the Invitation does not accept arbitrary unsupported media.
+86. As a visitor, I want visible play and pause controls, so that I control audio playback.
+87. As a visitor, I do not want audio to play unexpectedly without a browser-allowed user gesture, so that the page respects browser and user expectations.
+88. As an Owner, I want to remove or replace the Music track, so that I can change the Invitation atmosphere.
+89. As an Owner, I want the editor to show audio validation errors, so that unsupported or oversized files are not silently accepted.
 
-### Guests, links, and RSVP
+### Couple, Event, and regional content
 
-84. As an Owner, I want to create Guests manually, so that I can manage invitations without a spreadsheet.
-85. As an Owner, I want to organize Guests into Guest groups, so that I can manage households or invitation cohorts.
-86. As an Owner, I want to import Guests from CSV with a mapping and validation preview, so that existing lists are reusable.
-87. As an Owner, I want valid CSV rows imported after confirmation even when other rows fail, so that one bad row does not block useful data.
-88. As an Owner, I want a downloadable import error report, so that I can correct rejected rows.
-89. As an Owner, I want imports to be additive, so that they never silently replace or delete existing Guests.
-90. As an Owner, I want duplicate warnings based on normalized phone or name-plus-phone matches, so that likely duplicates are reviewable without unsafe name-only merges.
-91. As an Owner, I want existing Guest data to remain canonical during a merge, so that imported values do not overwrite trusted data automatically.
-92. As an Owner, I want each Guest to receive one active Personalized link automatically, so that I can share a ready-to-use link.
-93. As an Owner, I want to copy a Guest's Personalized link manually, so that I can send it through my preferred channel.
-94. As an Owner, I want to regenerate a Guest's link, so that a compromised or mis-shared link can be revoked.
-95. As a Guest, I want my Personalized link to identify only me or my household, so that other Guests' data remains private.
-96. As an Owner, I want to archive a Guest without losing RSVP history, so that corrections do not erase operational records.
-97. As an Owner, I want to export Guest data to CSV, so that I can use it for offline planning.
-98. As a Guest, I want to respond per Event, so that my attendance can differ between ceremony and reception.
-99. As a Guest using a Personalized link, I want to edit my RSVP until the Event begins, so that my response stays current.
-100. As a Guest, I want my attendee count limited by the Guest's allowed-attendee limit, so that the Owner receives bounded planning data.
-101. As a public visitor, I want to submit a Generic RSVP with my display name and attendee count, so that I can respond without a Personalized link.
-102. As a public visitor, I want to respond independently for each Event, so that multi-event Invitations collect accurate attendance.
-103. As an Owner, I want Generic RSVPs labeled as Unmatched RSVPs, so that I do not mistake them for identified Guests.
-104. As an Owner, I want to reconcile an Unmatched RSVP manually to a Guest, so that recognized responses become useful without unsafe auto-matching.
-105. As an Owner, I want Generic RSVPs to be submit-once in MVP, so that anonymous editing does not require another identity mechanism.
-106. As an Owner, I want RSVP responses for archived Events retained and exportable but read-only, so that historical reporting remains accurate.
-107. As an Owner, I want confirmed attendance and `maybe` responses reported separately, so that planning numbers are not inflated.
-108. As an Owner, I want to export RSVP data, so that I can use attendance information outside Vowly.
+90. As an Owner, I want to enter the couple identity, so that the Invitation identifies the people being celebrated.
+91. As an Owner, I want to create multiple Events, so that ceremony and reception details can coexist.
+92. As an Owner, I want exactly one active Primary event, so that the Invitation has an unambiguous main occasion.
+93. As an Owner, I want the Primary event to provide a title, date, and time before publication, so that the public Invitation has minimum useful information.
+94. As an Owner, I want each Event to have its own IANA time zone, so that displayed times and countdowns are correct.
+95. As an Owner, I want to archive an Event without deleting its response history, so that schedule changes remain auditable.
+96. As a visitor, I want Event details and countdowns to use the Event's local time zone, so that I do not misread the occasion.
+97. As an Owner, I want to provide an external Navigation link, so that visitors can open their preferred map application.
+98. As an Owner, I want to expose selected Contact persons, so that visitors can ask practical questions without seeing private Guest data.
+99. As an Indonesian visitor, I want customer-facing copy and formatting in id-ID, so that the Invitation feels native to the launch market.
+100.    As an Owner, I want content to remain translation-ready, so that future English support does not require changing the design document.
+
+### Media
+
+101. As an Owner, I want to upload supported image formats, so that I can use personal media.
+102. As an Owner, I want to upload supported audio formats, so that I can add one Music track.
+103. As an Owner, I want files stored outside the application web root, so that storage internals are not exposed.
+104. As an Owner, I want generated storage keys, so that uploaded filenames do not become public identifiers.
+105. As an Owner, I want image orientation normalized and metadata stripped, so that public media does not leak GPS or other EXIF information.
+106. As an Owner, I want responsive image derivatives, so that public pages load appropriately on different devices.
+107. As an Owner, I want media size, dimension, and quota limits enforced, so that the product remains predictable.
+108. As an Owner, I want media removed from a Draft to remain available while an older Published invitation references it, so that editing cannot break the public page.
+109. As an Owner, I want the Gallery to have a bounded image count, so that visitors are not presented with an unbounded library.
+110. As an Owner, I want media processing failures to be visible, so that I can replace a failed asset.
+
+### Draft editing, history, and persistence
+
+111. As an Owner, I want Draft changes to autosave, so that normal editing does not lose work.
+112. As an Owner, I want the editor to show save status, so that I know whether my latest changes are persisted.
+113. As an Owner editing in two tabs, I want a visible revision conflict, so that one tab never silently overwrites another.
+114. As an Owner, I want to retry a failed save, so that a temporary network problem does not discard my work.
+115. As an Owner, I want undo and redo for editor actions, so that I can explore without fear.
+116. As an Owner, I want undo and redo to preserve the design document's valid structure, so that history cannot create corrupt content.
+117. As an Owner, I want a Draft to retain a schema version, so that future document migrations are explicit.
+118. As an Owner, I want a published version to remain immutable, so that later Draft edits cannot leak publicly.
+119. As an Owner, I want a failed publication to leave the current Published invitation unchanged, so that a bad Draft cannot take down the public page.
+120. As an Owner, I want to continue editing a Draft while a previous Published invitation is public, so that I can prepare the next revision safely.
+121. As an Owner, I want a publication confirmation step, so that public exposure is deliberate.
+122. As an Owner, I want transformations and validation warnings shown before publication, so that I can resolve important issues.
+
+### Preview and publication
+
+123. As an Owner, I want an authenticated private Preview, so that unfinished content is not publicly shareable.
+124. As an Owner, I want Preview to use the same serialized design document as the editor, so that what I inspect matches what I publish.
+125. As an Owner, I want mobile, tablet, and desktop Preview viewports, so that I can check responsive behavior.
+126. As an Owner, I want to open a Preview without changing publication state, so that experimentation is safe.
+127. As an Owner, I want publication validation to require couple identity and a valid Primary event, so that essential content is present.
+128. As an Owner, I want publication to create an immutable Published invitation version, so that public rendering is stable.
+129. As an Owner, I want explicit publication without payment, so that the MVP can validate the editor and public Invitation experience.
+130. As an Owner, I want to unpublish at any time, so that I can temporarily remove public access.
+131. As an Owner, I want unpublishing to preserve the Draft, Published versions, Guests, RSVPs, Guestbook messages, and media, so that visibility changes are reversible.
+132. As a visitor, I want an unavailable Invitation to show a neutral response, so that internal state is not exposed.
+133. As an Owner, I want the public Invitation to be share-by-link and noindex, so that private celebrations do not appear in search or a Vowly directory.
+134. As a visitor, I want public pages to be responsive and accessible, so that the Invitation works across devices and assistive technologies.
+
+### Guests, Personalized links, and Forms
+
+135. As an Owner, I want to create Guests manually, so that I can manage invitations without a spreadsheet.
+136. As an Owner, I want to organize Guests into Guest groups, so that households or cohorts are easier to manage.
+137. As an Owner, I want to import Guests from CSV with mapping and validation Preview, so that existing lists are reusable.
+138. As an Owner, I want valid CSV rows imported after confirmation even when other rows fail, so that one bad row does not block useful data.
+139. As an Owner, I want a downloadable import error report, so that I can correct rejected rows.
+140. As an Owner, I want imports to be additive, so that they never silently replace or delete existing Guests.
+141. As an Owner, I want duplicate warnings based on normalized phone or name-plus-phone matches, so that likely duplicates are reviewable.
+142. As an Owner, I want each Guest to receive one active Personalized link, so that I can share a ready-to-use link.
+143. As an Owner, I want to copy a Guest's Personalized link, so that I can send it through my preferred channel.
+144. As an Owner, I want to regenerate a Guest's link, so that a compromised link can be revoked.
+145. As a Guest, I want a Personalized link to identify only me or my household, so that other Guests' data remains private.
+146. As an Owner, I want to archive a Guest without losing RSVP history, so that corrections do not erase operational records.
+147. As an Owner, I want to export Guest data to CSV, so that I can use it for offline planning.
+148. As a Guest using a Personalized link, I want to respond independently for each Event, so that attendance can differ between Events.
+149. As a Guest using a Personalized link, I want to edit my RSVP until the relevant Event begins, so that my response stays current.
+150. As an Owner, I want attendee counts limited by the Guest's allowed-attendee limit, so that planning data stays bounded.
+151. As a public visitor, I want to submit a Generic RSVP with a display name and attendee count, so that I can respond without a Personalized link.
+152. As an Owner, I want Generic RSVPs labelled as Unmatched RSVPs, so that I do not mistake them for identified Guests.
+153. As an Owner, I want to reconcile an Unmatched RSVP manually to a Guest, so that recognized responses become useful without unsafe auto-matching.
+154. As an Owner, I want Generic RSVPs to be submit-once in MVP, so that anonymous editing does not require another identity mechanism.
+155. As an Owner, I want RSVP responses for archived Events retained and exportable but read-only, so that historical reporting remains accurate.
+156. As an Owner, I want confirmed attendance and maybe responses reported separately, so that planning numbers are not inflated.
+157. As an Owner, I want to export RSVP data, so that I can use attendance information outside Vowly.
 
 ### Guestbook and public privacy
 
-109. As a public visitor, I want to submit a Guestbook message with a display name, so that I can send a wish to the couple.
-110. As an Owner, I want new Guestbook messages to start as `pending`, so that nothing abusive appears automatically.
-111. As an Owner, I want to approve, hide, or delete Guestbook messages, so that I control the public Guestbook.
-112. As a visitor, I want to report an inappropriate Guestbook message, so that harmful content can be reviewed.
-113. As an Owner, I want removing the Guestbook section to preserve its messages, so that I can restore the section later.
-114. As a public visitor, I want public responses to expose only published content, public media, approved Guestbook messages, and my own validated Personalized RSVP context, so that private data stays private.
-115. As a public visitor, I do not want to receive Guest lists, phone numbers, host notes, payment data, storage keys, or link secrets, so that the public page has a narrow data boundary.
-116. As an Owner, I want public Invitations to be share-by-link and `noindex`, so that private celebrations do not appear in search or a Vowly directory.
-117. As an Owner, I want public forms protected by validation, rate limits, origin/CSRF protection, and abuse controls, so that anonymous endpoints cannot be trivially abused.
+158. As a public visitor, I want to submit a Guestbook message with a display name, so that I can send a wish to the couple.
+159. As an Owner, I want new Guestbook messages to start as pending, so that nothing abusive appears automatically.
+160. As an Owner, I want to approve, hide, or delete Guestbook messages, so that I control the public Guestbook.
+161. As a visitor, I want to report an inappropriate Guestbook message, so that harmful content can be reviewed.
+162. As an Owner, I want removing the Guestbook block to retain its messages, so that I can restore the block later.
+163. As a public visitor, I want public responses to expose only Published content, public media, approved Guestbook messages, and my own validated Personalized RSVP context, so that private data stays private.
+164. As a public visitor, I do not want to receive Guest lists, phone numbers, host notes, payment data, storage keys, or link secrets, so that the public page has a narrow data boundary.
+165. As an Owner, I want public forms protected by validation, rate limits, origin/CSRF protection, honeypot controls, and abuse handling, so that anonymous endpoints are not trivially abused.
 
-### Payment and entitlement
+### Admin and operations
 
-118. As an Owner, I want one complete Vowly Publish — 1 Year product, so that I do not need to understand a feature matrix.
-119. As an Owner, I want to pay in IDR, so that launch pricing matches the Indonesian market.
-120. As an Owner, I want a local pending Payment created before checkout, so that payment state is recoverable if the browser closes.
-121. As an Owner, I want a failed or expired checkout to be retryable, so that a temporary provider problem does not block purchase.
-122. As an Owner, I want only the first verified successful payment to activate the entitlement, so that duplicate webhooks or retries cannot double-grant hosting.
-123. As an Owner, I want payment notifications verified by provider signature, amount, currency, order reference, and product, so that false payment callbacks cannot publish my Invitation.
-124. As an Owner, I want a full refund or reversal to revoke public hosting, so that access reflects the commercial state.
-125. As an Owner, I want my draft and operational data retained after a refund or reversal, so that support can reconcile the account without destroying history.
-126. As an Admin, I want manual refund/reversal handling audited, so that payment support actions are accountable.
-127. As an Owner, I want a payment receipt/status notification, so that I understand whether the entitlement is active.
-
-### Admin, compliance, and operations
-
-128. As an Admin, I want to search Users and Invitations, so that I can support customers.
-129. As an Admin, I want to inspect payment and entitlement state, so that I can explain publication availability.
-130. As an Admin, I want to moderate Guestbook messages, so that public abuse can be handled.
-131. As an Admin, I want to activate or deactivate templates, so that launch catalog operations do not require template authoring.
-132. As an Admin, I want every support access and mutation audited with a reason, so that customer data access is accountable.
-133. As an Admin, I want to force an Invitation unavailable for abuse, legal, security, or operational reasons, so that Vowly has an emergency safety control.
-134. As an Owner, I want to be notified of an Admin intervention when appropriate, so that support actions are not mysterious.
-135. As a User, I want account deletion to wait until owned Invitations complete their deletion lifecycles, so that ownership is not orphaned.
-136. As a User, I want legally or operationally required payment, audit, and backup records handled under their own retention rules, so that account deletion is honest about what must remain.
-137. As an Owner, I want the service to back up database and media data daily, so that an operational failure does not erase my Invitation.
-138. As an operator, I want a documented restore procedure and a completed restore test before launch, so that backups are actionable rather than merely present.
-139. As an Owner, I want upload validation to allow only approved formats and safe content, so that public media cannot introduce avoidable security risk.
-140. As a visitor, I want responsive pages that meet WCAG 2.2 AA expectations, so that the Invitation is usable across devices and assistive technologies.
+166. As an Admin, I want to search Users and Invitations, so that I can support Owners.
+167. As an Admin, I want to inspect Draft and Published invitation state, so that I can explain rendering or publication problems.
+168. As an Admin, I want to moderate Guestbook messages, so that public abuse can be handled.
+169. As an Admin, I want to activate or deactivate templates, so that the launch catalog can be operated without a template-builder product.
+170. As an Admin, I want support access to be read-only by default, so that Owner data is not changed accidentally.
+171. As an Admin, I want support access and mutations audited with a reason, so that operational actions are accountable.
+172. As an Admin, I want to force an Invitation unavailable for abuse, legal, security, or operational reasons, so that Vowly has an emergency safety control.
+173. As an Owner, I want to be notified of an Admin intervention when appropriate, so that support actions are not mysterious.
+174. As an operator, I want database and media backups, so that an operational failure does not erase Invitations.
+175. As an operator, I want a documented restore procedure and restore test, so that backups are actionable.
 
 ## Implementation Decisions
 
-### Product and domain boundaries
+### Product boundary
 
-- The launch product is one complete `Vowly Publish — 1 Year` offer: one Invitation, one year of Hosting entitlement, four templates, all launch features, up to 500 Guest records, up to 100 Gallery images, and 1 GB of media quota.
-- A User may own multiple Invitations. Every purchase and Hosting entitlement is scoped to exactly one Invitation and is not transferable or pooled in MVP.
-- The domain vocabulary is `User`, `Owner`, `Admin`, `Invitation`, `Event`, `Primary event`, `Guest`, `RSVP`, `Published invitation`, `Draft invitation`, `Hosting entitlement`, and `Unavailable invitation`. Do not introduce “studio” as a permission role.
-- The launch market is Indonesia. Customer-facing presentation defaults to Indonesian (`id-ID`) and IDR, while text is translation-ready for future English support.
-- An Event stores its own IANA time zone, defaulting to `Asia/Jakarta`; all event times and countdown calculations use that zone.
+- The MVP is a visual Invitation builder and publishing service.
+- The primary customer-facing actor remains the Owner. A studio is a normal User/Owner identity and does not receive a separate role.
+- The MVP supports one Invitation page. Multi-page design documents are deferred.
+- The MVP remains focused on wedding Invitations in Indonesia, with id-ID presentation and translation-ready text.
+- Payment, Midtrans, Payment records, Hosting entitlements, renewal, refund, reversal, chargeback, and payment-gated publication are excluded from this MVP.
+- An Owner can publish a valid Draft directly. Future payment enforcement must be added at the publication boundary rather than embedded in the editor document.
 
-### Editor document and rendering
+### Frontend and backend stack
 
-- Build the editor around a typed, versioned Invitation document with ordered top-level Sections and ordered Content blocks inside Sections.
-- The Visual editor, authenticated Preview view, and public renderer consume the same document representation. The primary seam is editor command → serialized document → responsive renderer.
-- Section types are registry-driven and include Cover, Couple, Countdown, Event schedule, Map/navigation, Love story, Gallery, Quote, Image + Text, Custom content, RSVP, QRIS/bank gifts, Guestbook, Contact person, and Divider.
-- The launch editor supports add, reorder, duplicate, hide, remove, and property editing. Every drag operation has keyboard/single-pointer equivalents: Move Up, Move Down, Insert Before, Insert After, Duplicate, and Delete.
-- Custom content remains a one-column container with approved blocks: Heading, Rich text, Image, Quote, Divider, and Button/link. It cannot contain arbitrary HTML, CSS, JavaScript, iframe, embed, system sections, or nested freeform layout.
-- Grid blocks are constrained responsive presets, not arbitrary coordinate placement. They may arrange eligible blocks in curated one-, two-, or three-column layouts and must stack/reflow at smaller widths.
-- Animation is limited to curated Animation presets such as none, fade, and slide/reveal behaviors. Presets must respect reduced-motion preferences and cannot contain arbitrary JavaScript or user-authored timelines.
-- Enforce the approved Section limits: 20 top-level Sections; 100 total Gallery images; one active RSVP, event schedule, map/navigation, QRIS/bank gifts, Guestbook, Countdown, and Contact section; bounded content-section counts from the PRD.
-- Draft autosave increments a draft revision. Concurrent edits must detect a stale revision and present a recoverable conflict rather than silently overwriting changes.
-- Template changes transform only the Draft invitation. The current Published invitation remains unchanged. The editor presents transformed, unsupported, and omitted content for review before republishing.
-- Deactivating a template prevents new selections and template changes but does not invalidate existing Invitations using it; those Invitations remain renderable and republishable.
-- Preview viewports cover mobile, tablet, and desktop. Preview is authenticated and private.
+- Use Laravel 13 as a modular monolith.
+- Use the official Laravel React Starter Kit.
+- The starter kit provides React 19, TypeScript, Inertia 3, Tailwind CSS 4, shadcn/ui, Vite, and Laravel Fortify authentication.
+- Use React for the Owner editor, Preview, public renderer, and Admin UI.
+- Use Inertia for application navigation and server-provided page props. Use JSON HTTP endpoints for high-frequency editor persistence, media operations, and public form submissions where appropriate.
+- Do not create a separate Next.js application or separate frontend deployment for the MVP.
+- Use PostgreSQL for relational data and serialized Draft/Published design documents.
+- Use Redis for queues, caching, rate limiting, exports, media processing, and scheduled cleanup.
+- Use S3-compatible object storage and a CDN for media. Originals remain outside the application web root; public Published derivatives are served through controlled public media URLs.
+- Use Docker Compose on a VPS with separate application, web, queue-worker, and scheduler processes. PostgreSQL and Redis may run as Compose services for the MVP.
 
-### Publication lifecycle
+### Initialized project foundation
 
-- Keep Visibility, Hosting entitlement, Payment, and Published version as separate concepts.
-- Visibility states are draft, published, unpublished, and expired. Hosting entitlement states are none, active, expired, and revoked. Payment states include pending, paid, failed, expired, and refunded.
-- Publication requires a valid Draft invitation, one active Primary event, couple identity, Primary event title/date/time, an active Hosting entitlement, and explicit Owner confirmation that the content is ready and may be public.
-- A successful payment never publishes automatically. Payment creates or activates the entitlement; the Owner must publish explicitly.
-- Publishing validates the Draft invitation, creates an immutable Published invitation snapshot, and atomically makes that snapshot public. A failed publish leaves the previous Published invitation untouched.
-- The public route renders only the latest Published invitation snapshot, never the mutable Draft invitation.
-- Unpublishing preserves data and entitlement but does not pause or extend the paid period.
-- An active renewal extends from the current entitlement end. A renewal after expiry starts when payment is verified.
-- Full refund, reversal, or chargeback revokes the entitlement and makes the Invitation unavailable. Partial refunds and proration are out of scope.
-- Invitation deletion makes the Invitation unavailable immediately and starts a 30-day recovery period. Restoration preserves data and the original entitlement end date. Permanent deletion removes customer-facing data after recovery, while required payment/audit/backup records follow their own retention rules.
-- All unavailable public states use a neutral non-enumerating response. Public visitors do not learn whether an Invitation was unpublished, expired, deleted, suspended, or otherwise unavailable.
+- The repository now contains an initialized Laravel application rather than documentation only.
+- The current installed baseline is Laravel Framework 13.33.0 on PHP 8.4.25, Inertia Laravel 3.3.4, Inertia React 3.7.1, React 19.3.0, TypeScript 5.9.3, Tailwind CSS 4.3.3, Vite 8.3.0, Laravel Fortify 1.39.0, Laravel Wayfinder 0.1.21, Pest 5.2.1, Larastan 3.12.2, Pint 1.32.1, and Laravel Boost 2.9.1.
+- The React Starter Kit is configured with TypeScript, Inertia, Tailwind, shadcn/ui New York components, Radix primitives, Lucide icons, React Compiler support, and Wayfinder-generated frontend route helpers.
+- The scaffold currently includes authentication, email verification, password reset, two-factor authentication, passkeys, profile/security/appearance settings, Teams, team membership, team invitations, and a team-scoped dashboard.
+- The generated Teams capability is starter-kit infrastructure. It is not a Vowly domain role and must not introduce a Studio role. Before Invitation implementation, the team scaffold must either be removed or explicitly isolated from the Vowly domain.
+- The current local defaults use SQLite, database-backed sessions/cache/queues, local filesystem storage, log mail, and UTC. PostgreSQL, Redis, object storage/CDN, and production deployment are future environment work.
+- No Vowly-specific Invitation, Design document, Canvas, Event, Guest, RSVP, or Published invitation implementation exists yet.
 
-### URLs and public data
+### Invitation design document
 
-- The canonical public URL is path-based: `https://vowly.id/i/{slug}`. A slug may change while Draft-only and is immutable after first publication.
-- Personalized links use opaque Guest tokens. Tokens are stored as secure hashes, are never accepted as browser-provided Guest IDs, and are immediately revoked when regenerated or when a Guest is archived.
-- Public reads expose only the Published invitation document, public media URLs, event details, approved Guestbook messages, and validated Personalized-link context for that Guest.
-- Public reads never expose Guest lists, private phone numbers, host notes, payment data, storage keys, raw/hashed tokens, or unrelated Guest RSVP state.
-- Public writes support Generic RSVP, Personalized RSVP, and Guestbook submission. They require validation, origin/CSRF protection where applicable, invitation/IP/token rate limits, honeypot abuse controls, and non-sequential public identifiers.
-- Invitations are share-by-link and carry `noindex`; there is no public Invitation directory or Invitation sitemap. Landing, demo, and support pages may be indexed.
-- Public navigation uses Owner-provided external links rather than an embedded map provider.
+- The primary seam is editor command → serialized Invitation design document → responsive renderer.
+- The design document is versioned and has a schema version.
+- The document contains an ordered tree of Sections, Containers, Grid layouts, and Content blocks.
+- Every Section, Container, Grid, and Content block has a stable identifier.
+- Each node has a typed kind, validated properties, allowed children, responsive settings, and optional Animation preset.
+- The document is stored as JSON while domain data such as Users, Events, Guests, RSVPs, media records, Guestbook messages, and audit records remain relational.
+- The Draft document is mutable. A Published invitation version stores an immutable snapshot of the validated document.
+- The editor and public renderer use an allowlisted component registry. The registry defines editing controls, validation, responsive behavior, and public rendering for each supported type.
+- User-authored arbitrary HTML, CSS, JavaScript, iframe, embed, and animation timelines are not accepted.
+- The editor persists document snapshots with a monotonic Draft revision. A stale revision produces a recoverable conflict rather than silently overwriting a newer Draft.
 
-### Guests and RSVP
+### Editor structure and interaction
 
-- Guest identity belongs to an Invitation. RSVP records belong to one Invitation, one Event, and optionally one Guest.
-- A Guest may represent a person or household. Required Guest data is full name; phone, group, and host-only notes are optional. Allowed attendees default to one and are bounded from one to 20 per Event.
-- Each created/imported Guest receives one active Personalized link. Vowly provides copy/regenerate actions but does not deliver links through WhatsApp or email.
-- CSV import is additive and begins with mapping/validation preview. Valid rows may be imported after confirmation; invalid rows receive a downloadable error report. Existing Guests are never overwritten or deleted automatically.
-- Duplicate warnings use normalized phone matches or normalized name-plus-phone matches. Names alone do not auto-merge. If the Owner merges, the existing Guest remains canonical and imported non-empty values fill blanks unless conflicts are explicitly resolved.
-- Guest archive revokes its Personalized link and prevents new responses while retaining RSVP history.
-- Personalized RSVP identifies the Guest from the validated token and supports create/edit until the relevant Event begins in that Event's local time zone. After the RSVP cutoff, responses are read-only.
-- Generic RSVP requires display name, status, and attendee count, is labelled Unmatched RSVP, is submit-once in MVP, and has a one-to-20 attendee bound.
-- Multi-Event forms collect independent responses per Event. Existing responses for archived Events remain viewable/exportable but cannot be edited or newly submitted.
-- Attendance reporting separates confirmed `attending` counts from `maybe` counts and unique responding households; it must not claim a universal combined headcount across overlapping Events.
-- Owners may manually reconcile an Unmatched RSVP to a Guest. The system never auto-matches by name.
-- Guest and RSVP exports include Owner-visible operational fields but exclude token secrets, payment secrets, storage internals, and unnecessary internal identifiers. Each export is audited.
+- The editor is visually direct and Figma-like in selection and manipulation, but the MVP uses structured flow and Grid layout rather than arbitrary pixel coordinates.
+- The top-level composition is one page containing ordered Sections.
+- Sections may contain approved Containers and Content blocks.
+- Containers may contain approved Content blocks or one constrained Grid.
+- Grid supports one, two, or three columns with bounded gap, alignment, and responsive stacking.
+- Nested arbitrary layout trees, unbounded nesting, and arbitrary coordinate placement are deferred.
+- Every pointer interaction has a keyboard or single-pointer equivalent where it changes document order or content.
+- React editor state uses command-oriented transitions for add, move, duplicate, edit, style, animation, audio, undo, and redo operations.
+- Undo and redo are local editor behavior. The server persists valid Draft snapshots rather than an event-sourced command log.
+- React list rendering uses stable document node identifiers rather than array positions.
 
-### Guestbook, gifts, contacts, and media
+### MVP Content block registry
 
-- Any public visitor may submit a Guestbook message with a display name and bounded message text. Messages start `pending`; the Owner may approve, hide, or delete them. Visitors cannot edit after submission.
-- Visitors can privately report an inappropriate Guestbook message. The report queues review without exposing the reporter publicly.
-- Removing a Guestbook or other Section removes it from the Draft presentation but retains its underlying data. Re-adding the Section restores access; permanent data deletion is explicit.
-- Display-only gifts support one QRIS image and multiple bank-account entries. Vowly does not receive, verify, or reconcile gift payments.
-- Contact person details are public only when explicitly enabled by the Owner.
-- Uploads allow JPEG, PNG, WebP, and AVIF images, with optional curated MP3 support excluded from MVP because launch has no background music. Validate extension and content signature, enforce size/dimension limits, generate random storage keys, strip EXIF, normalize orientation, keep objects outside the public web root, and generate responsive derivatives.
-- Media referenced by any Published invitation remains available even if removed from the Draft. Storage cleanup waits until no Published version, recovery period, or other retention rule references it.
+- Include Heading, Text, Image, Button/link, Quote, Divider, Countdown, Gallery, Couple, Event schedule, Navigation, Contact person, RSVP Form, Guestbook, Gifts, and Music blocks.
+- Rich text is limited to paragraphs, bold, italic, links, and line breaks.
+- Form blocks are registry-defined forms. MVP forms include RSVP and Guestbook; arbitrary user-defined fields and workflows are deferred.
+- Music supports one audio track per Invitation with validated format and size limits.
+- Audio must expose explicit play/pause controls. Autoplay is best-effort only and must respect browser user-gesture requirements.
+- Animation supports a small registry of presets such as none, fade, and slide/reveal.
+- Animation presets respect reduced-motion preferences and contain no user-authored JavaScript.
+- Only one active RSVP block, one active Guestbook block, one active Countdown block, one active Event schedule block, one active Navigation block, one active Gifts block, and one active Contact person block are allowed in the MVP unless a later decision expands these limits.
 
-### Payment and infrastructure
+### Styles and responsive behavior
 
-- Isolate Midtrans behind a provider-neutral PaymentProvider boundary for checkout creation, webhook verification, status lookup, and manual refund workflow.
-- Create a local pending Payment before checkout. Use the local reference for idempotency. Verify webhook signature, amount, currency, order reference, and expected product before transitioning Payment.
-- Allow one active pending checkout per Invitation. Failed/expired attempts may be retried. The first verified success activates the entitlement; duplicate or late notifications are no-ops.
-- Use PostgreSQL for primary data, Redis for queues/cache, object storage/CDN for media, and Docker Compose on a VPS. Workers handle slow follow-up work such as receipts and media derivatives.
-- Back up database and media data daily for 30 days, document restoration, and complete a restore test before launch. Do not promise an unmeasured customer-facing RPO/RTO.
+- Style controls use approved design tokens and bounded values for typography, color, background, spacing, border, radius, alignment, and visibility.
+- The editor supports mobile, tablet, and desktop Preview viewports.
+- Responsive overrides are limited to approved properties and breakpoints.
+- Grid columns stack or reflow at smaller widths according to the block registry.
+- The public renderer ignores invalid or unsupported style values.
+- The renderer must remain semantic and accessible even when an Owner chooses unusual visual styles.
 
-### Roles, safety, and accessibility
+### Authentication and authorization
 
-- Use only `owner` and `admin` roles in MVP. Editor membership remains schema-ready but hidden behind a future feature flag.
-- Admin support is read-only by default, requires a reason, and audits actor, target Invitation, reason, timestamp, and action. Mutations are audited separately.
-- Admin may force an Invitation unavailable for abuse, legal, security, or operational reasons while preserving Owner data and notifying the Owner when appropriate.
-- Owner publication requires confirmation of public readiness and responsibility for rights/consent covering uploaded media, public Contact details, and public gift details.
-- Target WCAG 2.2 AA for platform UI, the Visual editor, public Invitations, RSVP forms, and Guestbook forms. Ensure semantic structure, labels, focus, contrast, keyboard alternatives, screen-reader announcements, and reduced-motion behavior.
+- Use Laravel Fortify features from the official starter kit for registration, login, password reset, and email verification.
+- An unverified User may create and edit a Draft but must verify email before publication.
+- Use Owner and Admin roles only.
+- Owner authorization is scoped to owned Invitations.
+- Admin support access is audited and read-only by default, with mutations requiring a reason.
+
+### Couple, Event, Guest, and Form domain
+
+- An Invitation owns its Events, Guests, RSVPs, media, Guestbook messages, and design document.
+- An Event stores its local IANA time zone and uses it for display and RSVP cutoff behavior.
+- Exactly one active Primary event is required for publication.
+- RSVP records belong to one Invitation, one Event, and optionally one Guest.
+- Personalized links use opaque tokens stored as secure hashes and never accept browser-provided Guest IDs.
+- Generic RSVP creates an Unmatched RSVP and is submit-once in the MVP.
+- Guestbook messages are pending until approved by the Owner or Admin.
+- Public form responses expose only the minimum required context.
+
+### Draft and publication lifecycle
+
+- Visibility states are Draft, Published, and Unpublished for this MVP.
+- There is no Hosting entitlement or expiry state in the MVP.
+- Publication requires a valid Draft, couple identity, and one active Primary event with title, date, and time.
+- Publication creates an immutable Published invitation version and makes it public atomically.
+- Payment is not checked during publication.
+- The public route renders only the latest Published invitation version, never the mutable Draft.
+- Unpublishing preserves Draft, Published versions, Guests, RSVPs, Guestbook messages, and media.
+- The public route uses a neutral unavailable response for Unpublished Invitations.
+- A slug may change while Draft-only and becomes immutable after first publication.
+- Public Invitations use noindex and are share-by-link; there is no public Invitation directory or Invitation sitemap.
+
+### Media and safety
+
+- Allow JPEG, PNG, WebP, and AVIF images, plus one approved audio format for Music.
+- Validate file extension, content signature, MIME type, size, dimensions, and quota.
+- Generate random storage keys and keep files outside the application web root.
+- Normalize image orientation, strip EXIF metadata, and generate responsive derivatives.
+- Media referenced by any Published invitation remains available even if removed from the Draft.
+- Cleanup waits until no Published version, recovery rule, or other retention rule references the media.
+
+### API and persistence boundaries
+
+- Laravel controllers and application services own authentication, authorization, validation, document persistence, publication, media, Guests, Events, RSVPs, Guestbook moderation, and exports.
+- The editor uses a JSON document persistence interface that accepts a Draft revision and returns the persisted revision or a conflict.
+- Public reads expose only the Published invitation document, public media, Event details, approved Guestbook messages, and validated Personalized RSVP context.
+- Public writes support Generic RSVP, Personalized RSVP, and Guestbook submission with validation, rate limits, CSRF/origin controls where applicable, honeypots, and abuse controls.
+- Payment interfaces are intentionally absent from the MVP. Future payment work may add a publication prerequisite without changing the document contract.
 
 ## Testing Decisions
 
-- Tests must assert external behavior at the highest available seam. Do not couple tests to internal class names, database implementation details, or incidental component structure.
-- The primary seam is the serialized Invitation document between editor commands and responsive rendering. Tests should prove that adding/editing/reordering/hiding/removing Sections and Content blocks produces the expected document and that authenticated Preview and public rendering honor the same document at mobile, tablet, and desktop viewports.
-- The first application-level acceptance path should cover: create Invitation, choose template, edit draft, preview responsively, upload media, import Guests, verify payment, explicitly publish, resolve the public URL, open a Personalized link, submit RSVP, and export results.
-- Test the editor document schema and validation with external behavior: valid block operations, Section limits, Grid reflow, Animation presets, reduced-motion behavior, stale draft conflict, template transformation review, and publish readiness.
-- Test Publication and entitlement transitions through application-level behavior: payment does not publish, first verified webhook activates exactly one entitlement, duplicate webhook is harmless, unpublish preserves data, expiry/revocation makes the public route unavailable, renewal preserves active paid time, and deletion recovery does not extend hosting.
-- Test public data boundaries with requests against generic and Personalized routes. Prove that a visitor cannot obtain Guest lists, private fields, other Guests' RSVP state, token material, payment data, or storage internals.
-- Test CSV import using valid rows, invalid rows, partial success, normalized duplicate warnings, explicit merge conflicts, and additive behavior.
-- Test RSVP behavior by Event: Personalized and Generic submissions, attendee bounds, edit cutoff, archived Events, Unmatched RSVP reconciliation, `attending`/`maybe` reporting, and export contents.
-- Test Guestbook moderation and reporting through public submission plus Owner/Admin moderation behavior.
-- Test PaymentProvider behavior with provider-sandbox or contract fixtures for signature validation, wrong amount/currency/reference, retries, duplicate notifications, refunds, and late notifications after deletion.
-- Test upload safety with allowed/denied formats, MIME/content mismatch, size and dimension limits, EXIF stripping, generated derivatives, generated storage keys, and media retention while referenced by a Published version.
-- Test authorization and audit behavior for Owner, Admin, public visitor, Generic RSVP visitor, Personalized Guest, and archived/deleted records.
-- Add browser-level accessibility and responsive smoke coverage for keyboard editor flows, focus management, reduced motion, public forms, and mobile/tablet/desktop rendering.
-- There is no existing application or test suite in the repository. Establish the initial test conventions around application-level integration/feature tests, focused domain validation tests, and a small browser smoke suite rather than inventing parallel seams.
+- Tests assert external behavior at the highest available seam and do not couple to incidental component structure, internal class names, or storage implementation details.
+- The primary seam is the serialized Invitation design document between editor commands and responsive rendering.
+- Document tests prove add, edit, move, duplicate, hide, remove, Grid changes, responsive settings, Animation presets, Music settings, Form blocks, validation, undo/redo behavior, stable IDs, and stale revision conflicts.
+- Renderer tests prove that the same valid document produces the expected editor Preview and public rendering behavior at mobile, tablet, and desktop viewports.
+- Application-level feature tests cover registration, email verification, Invitation ownership, Draft persistence, Preview access, publication, unpublishing, slug immutability, Guest operations, RSVP, Guestbook moderation, media access, exports, authorization, and audit behavior.
+- Browser tests cover the Owner editor's primary keyboard and pointer flows, responsive Preview, reduced-motion behavior, public RSVP, and Guestbook submission.
+- Media tests cover allowed and denied formats, MIME/content mismatch, size and dimension limits, EXIF stripping, responsive derivatives, audio validation, generated storage keys, and Published media retention.
+- Public data-boundary tests prove that visitors cannot obtain Guest lists, private phone numbers, host notes, token material, payment data, storage internals, or unrelated Guest RSVP state.
+- Form abuse tests cover validation, rate limits, origin/CSRF behavior, honeypots, duplicate Generic RSVP handling, and Guestbook reporting.
+- The repository now has a Laravel/Pest application and test suite from the starter scaffold. Existing tests cover authentication, email verification, password reset, two-factor authentication, profile/security settings, Teams, team invitations, and the starter dashboard.
+- No Vowly-specific behavior tests exist yet. New work should extend the existing application-level feature-test conventions, add focused Design document validation tests, and add a small Playwright accessibility/responsive smoke suite.
 
 ## Out of Scope
 
+- Midtrans or any other payment provider.
+- Payment records, checkout, webhooks, receipts, refunds, chargebacks, renewals, and Hosting entitlements.
+- Payment-gated publication or expiry based on paid hosting time.
+- True freeform Figma coordinate positioning.
+- Vector drawing, pen tools, arbitrary shape tools, or a general graphics editor.
+- Arbitrary HTML, CSS, JavaScript, iframe, embed, or user-authored animation timelines.
+- Multiple pages, reusable user-created Sections, reusable component libraries, or template marketplace.
+- Real-time collaboration, Comments, editor invitations, approval workflows, and presence indicators.
+- Arbitrary form-builder fields, conditional form logic, meal choices, dietary requirements, or guest notification campaigns.
 - Custom domains and subdomain-based public URLs.
-- QR check-in and offline check-in.
-- Seating plans and table planning.
-- Official WhatsApp Business API, bulk WhatsApp messaging, invitation delivery automation, and RSVP reminder campaigns.
-- Vendor workspace, wedding organizer/client workspace, white-labeling, client approval workflow, and studio-specific roles.
-- Spouse/editor collaboration, real-time co-editing, comments, and collaboration workflows.
-- A true freeform Figma-style coordinate canvas, arbitrary nested drag-and-drop containers, freeform positioning, custom CSS/HTML/JavaScript, embeds, iframes, and user-authored animation timelines.
-- User-created reusable sections, template marketplace, third-party templates, and admin visual template authoring.
-- More than four launch templates.
-- Feature-matrix plans, add-on pricing, pooled credits, account-wide entitlements, transferable purchases, and partial refunds/proration.
-- Platform-collected or reconciled QRIS/bank payments.
-- Background music uploads and arbitrary user audio. A curated royalty-cleared track list remains a future option.
-- Rich text beyond paragraphs, bold, italic, links, and line breaks.
-- Generic RSVP editing, arbitrary RSVP questions, meal choices, dietary requirements, and guest open-tracking dashboards.
-- XLSX or Google Sheets imports.
+- Official WhatsApp API, bulk messaging, invitation delivery automation, and RSVP reminders.
+- QR check-in, offline check-in, seating plans, and table planning.
 - Rich analytics beyond operational counts.
-- Public search/listing of Invitations.
-- Custom map SDK embedding.
-- Native guest notifications, invitation sending, marketing campaigns, or guest-facing accounts.
+- XLSX or Google Sheets imports.
+- Platform-collected or reconciled QRIS/bank payments.
+- Background music playlists or guaranteed autoplay.
 - A formal customer-facing RPO/RTO promise before operational measurements exist.
 
 ## Further Notes
 
-- This spec synthesizes the approved `prd.md` baseline plus the confirmed Visual editor clarification. Where the earlier PRD said “structured top-level section builder,” this spec makes the intended experience explicit: visual direct manipulation over a constrained Section/Content-block document.
-- The domain glossary and ADRs are the durable source for terms and hard-to-reverse boundaries. In particular, preserve the path-based URL, invitation-scoped entitlement, immutable Published invitation, neutral unavailable state, event-local time zones, share-by-link privacy, and constrained Visual editor decisions.
-- The expected launch sequence is foundations/auth and schema, templates/rendering, Visual editor, media/content, Publication/public pages, Guests, RSVP, Payment/entitlement, Admin/support, accessibility/security, operations, and pilot launch.
-- The next flow is `/to-tickets`, which should split this spec into dependency-aware local issues under `.scratch/vowly-mvp/issues/` and mark each generated ticket `ready-for-agent`.
+- This spec supersedes the earlier constrained-editor baseline. The MVP now prioritizes the visual editor while retaining structured responsive output.
+- The existing decision to use path-based public URLs remains: https://vowly.id/i/{slug}.
+- The existing immutable Published invitation decision remains: Draft edits never mutate the current public version.
+- The existing share-by-link privacy decision remains: public Invitations are noindex and are not listed in a directory.
+- Existing payment and Hosting entitlement decisions are retained as future commercial design, not MVP implementation scope.
+- The next decomposition should split work around the document contract, editor shell, Content block registry, Grid/responsive rendering, media, Draft persistence, Preview/public rendering, Guest/RSVP forms, Guestbook moderation, and accessibility/security.

@@ -1,77 +1,120 @@
 # Vowly
 
-Vowly is a paid publishing service for personalized wedding invitations in Indonesia. The domain separates an invitation's content, public availability, hosting entitlement, payment, guests, events, and responses.
+Vowly is a visual invitation builder for personalized wedding Invitations in Indonesia. An Owner composes a responsive Invitation through a visual editor, saves a Draft, previews it privately, and explicitly publishes an immutable Published invitation version through a share-by-link public URL.
+
+The MVP does not include payment or Hosting entitlements. Payment and paid hosting are future commercial concepts that may later gate publication without changing the Invitation design document.
 
 ## Actors and ownership
 
 **User**:
-A login identity that can own one or more invitations.
+A login identity that can own one or more Invitations.
 _Avoid_: account, customer, studio user
 
-A User may draft and preview before email verification, but must be verified before checkout or public publication.
+A User may draft and preview before email verification, but must be verified before public publication.
 
 **Owner**:
-The User who owns an Invitation and controls its content, publication, guest data, and payment-related actions.
+The User who owns an Invitation and controls its content, publication, Guest data, and media.
 _Avoid_: customer, studio role
 
 **Admin**:
-A Vowly support operator with audited access to customer data for support and operational work.
+A Vowly support operator with audited access to Owner data for support and operational work.
 _Avoid_: staff user when referring to the domain role
 
-## Invitation and publication
+## Invitation and visual composition
 
 **Invitation**:
-A customer's wedding invitation product, including its event details, content, media, guest operations, and publication state.
+A wedding invitation product owned by a User. It includes its Events, Guests, RSVP responses, media, Guestbook messages, design document, Draft state, and Published invitation versions.
 
-One User may own multiple Invitations. Each Invitation has its own publication and hosting entitlement.
+One User may own multiple Invitations. Each Invitation has its own design document and publication state.
 
-**Event**:
-A scheduled ceremony, reception, or other wedding occasion belonging to an Invitation.
-_Avoid_: occasion when referring to a record in the invitation
+**Design document**:
+The structured representation of an Invitation's visual composition. It contains ordered Sections, Containers, Grid layouts, Content blocks, style settings, responsive settings, Animation presets, and optional Music configuration.
 
-Each Event has a local IANA time zone, defaulting to `Asia/Jakarta`; dates, times, and countdowns use that Event time zone.
+**Canvas**:
+The Owner-facing visual presentation of the Design document during editing. The MVP Canvas provides direct selection and manipulation within structured responsive layout; it is not an arbitrary coordinate drawing surface.
 
-**Primary event**:
-The one Event designated as the main occasion for an Invitation. Countdown and default invitation emphasis refer to this Event.
+**Section**:
+An ordered top-level container in an Invitation. A Section groups related Containers and Content blocks and can be added, reordered, duplicated, hidden, or removed.
 
-An Invitation must have exactly one active Primary event before it can be published.
+**Container**:
+A layout boundary inside a Section that groups Content blocks or an approved Grid.
+
+**Grid**:
+A constrained responsive layout with one, two, or three columns. Grid columns reflow or stack at smaller Preview viewports.
+
+**Content block**:
+A typed item inside a Section or Container, such as Heading, Text, Image, Button/link, Quote, Divider, Countdown, Gallery, Couple, Event schedule, Navigation, Contact person, RSVP Form, Guestbook, Gifts, or Music.
+
+**Form block**:
+A typed public interaction block with a known data contract. MVP Form blocks include RSVP and Guestbook. Arbitrary Owner-defined fields and workflows are not part of the MVP.
+
+**Style setting**:
+An allowlisted visual property such as typography, color, background, spacing, border, radius, alignment, or visibility. Style settings use bounded values so the public renderer remains safe and maintainable.
+
+**Responsive setting**:
+An allowlisted change to a Design document property at an approved mobile, tablet, or desktop Preview viewport.
+
+**Animation preset**:
+A curated visual behavior applied to an eligible Section or Content block. It has reduced-motion behavior and does not contain arbitrary user JavaScript or user-authored timelines.
+
+**Music**:
+One optional audio track attached to an Invitation. Music has explicit play/pause controls and does not guarantee browser-blocked autoplay.
+
+## Publication
+
+**Draft**:
+The Owner's mutable working Design document. It may change while a different Published invitation version remains public.
+
+**Preview**:
+An authenticated, private presentation of the Draft Design document at an Owner-selected responsive viewport.
 
 **Publication**:
-The explicit act of making an Invitation available through its public URL after payment entitlement and invitation content requirements are satisfied.
-_Avoid_: payment, activation
+The explicit act of making a valid Draft available through its public URL. In the MVP, publication does not require payment or a Hosting entitlement.
 
-An Invitation's slug may be chosen or changed while it is a draft. After first publication, the slug is fixed for the life of that Invitation.
-Publication requires the Owner to confirm that the Invitation is ready to be public and that its displayed content and uploaded media may be published.
+An Invitation's slug may be chosen or changed while the Invitation is Draft-only. After first publication, the slug is fixed for the life of that Invitation.
 
-**Hosting entitlement**:
-The time-bounded right for an Invitation to remain publicly available. Payment creates or renews this right; payment and entitlement are separate concepts.
-_Avoid_: subscription, plan status
-
-An active renewal extends from the current entitlement end. A renewal after expiry starts when payment is verified.
-Unpublishing does not pause or extend the entitlement.
+Publication requires the Owner to confirm that the content is ready to be public and that the displayed content and uploaded media may be published.
 
 **Published invitation**:
-The version of an Invitation currently shown to public visitors after the Owner explicitly publishes it.
+The immutable version of an Invitation currently shown to public visitors after the Owner explicitly publishes it.
 
-**Draft invitation**:
-The Owner's mutable working version. It may change while a different Published invitation remains public.
+**Unavailable invitation**:
+The neutral public state shown when an Invitation is unpublished or otherwise not eligible for public viewing. It does not reveal internal state.
 
-**Publishable invitation**:
-A Draft invitation with the minimum required couple identity and a valid Primary event with title, date, and time. Optional content does not affect publishability.
+**Hosting entitlement**:
+A future time-bounded right for an Invitation to remain publicly available after payment. It is not implemented in the MVP.
 
-## Guests and responses
+**Vowly Publish — 1 Year**:
+A future commercial product concept for paid publication and hosting. It is not part of the current MVP.
 
-**Guest**:
-A person or household invited to an Invitation and optionally associated with one or more Events.
+## URLs and privacy
 
-Guest identity belongs to the Invitation, not to an individual Event. A Guest's allowed-attendee limit is evaluated separately for each Event.
+**Share-by-link Invitation**:
+An Invitation intended to be reached through an Owner-shared link, not through search results, a public Vowly directory, or automated guest messaging.
+
+The canonical public URL is https://vowly.id/i/{slug}. Public Invitations use noindex and Vowly does not expose an Invitation directory or Invitation sitemap.
 
 **Personalized link**:
-An opaque public link that identifies one Guest without exposing the guest list or accepting browser-supplied guest identity.
+An opaque public link that identifies one Guest without exposing the Guest list or accepting browser-supplied Guest identity.
 _Avoid_: guest URL when referring to the domain concept
 
 Regenerating a Personalized link immediately revokes the previous link.
-Each Guest receives one active Personalized link when created or imported; Vowly does not deliver it to the Guest.
+
+## Guests and responses
+
+**Event**:
+A scheduled ceremony, reception, or other wedding occasion belonging to an Invitation.
+_Avoid_: occasion when referring to a record in the Invitation
+
+Each Event has a local IANA time zone, defaulting to Asia/Jakarta; dates, times, countdowns, and RSVP cutoffs use that Event time zone.
+
+**Primary event**:
+The one Event designated as the main occasion for an Invitation. Countdown and default Invitation emphasis refer to this Event.
+
+An Invitation must have exactly one active Primary event before it can be published.
+
+**Guest**:
+A person or household invited to an Invitation and optionally associated with one or more Events. Guest identity belongs to the Invitation, not to an individual Event.
 
 **Generic RSVP**:
 An RSVP response that is not associated with a known Guest and therefore requires its own display name and attendee count.
@@ -80,9 +123,9 @@ An RSVP response that is not associated with a known Guest and therefore require
 An RSVP response associated with a Guest through that Guest's validated Personalized link.
 
 **RSVP**:
-A Guest's or visitor's response to attendance for one Event. An RSVP is event-specific rather than a single invitation-wide answer.
+A Guest's or visitor's response to attendance for one Event. An RSVP is event-specific rather than a single Invitation-wide answer.
 
-`attending` contributes to confirmed attendance; `maybe` is reported separately and never counted as confirmed attendance.
+attending contributes to confirmed attendance; maybe is reported separately and never counted as confirmed attendance.
 
 **Unmatched RSVP**:
 A Generic RSVP that has not been associated with a Guest. The Owner may reconcile it manually, but the system does not infer identity automatically.
@@ -90,130 +133,40 @@ A Generic RSVP that has not been associated with a Guest. The Owner may reconcil
 **Guestbook message**:
 A public visitor's message for the couple that remains private until the Owner approves it.
 
-A Guestbook message moves through `pending`, `visible`, or `hidden`. Visitors cannot edit messages after submission.
+A Guestbook message moves through pending, visible, or hidden. Visitors cannot edit messages after submission.
 
-## Commercial model
-
-**Vowly Publish — 1 Year**:
-The single launch product: one Invitation's public hosting entitlement for one year, with the complete launch feature set.
-
-**Invitation-scoped purchase**:
-A purchase that belongs to exactly one Invitation. It cannot be transferred or pooled in the MVP.
-
-**Entitlement reversal**:
-The loss of hosting eligibility after a full refund, payment reversal, or equivalent administrative action. It makes the Invitation unavailable publicly without erasing its Owner's retained data.
-
-## Invitation changes
-
-**Template change**:
-A draft transformation from one Vowly template to another. It never mutates the currently Published invitation; the Owner must review and explicitly republish the transformed draft.
-
-If the transformation changes or omits content, the Owner must review the reported changes before republishing.
-
-**Template availability**:
-Whether a template can be selected for new Invitations or template changes. Deactivating a template does not invalidate Invitations already using it.
-
-**Ownership transfer**:
-Changing the User who owns an Invitation. Self-service ownership transfer is not available in the MVP; exceptional Admin corrections are audited support actions.
-
-**Support access**:
-An Admin's intentional access to a customer's Invitation for a stated operational reason. Support access is read-only by default and audited, with mutations recorded separately.
-
-**Admin intervention**:
-An audited Admin action that makes an Invitation unavailable for abuse, legal, security, or operational reasons while preserving its Owner data. The Owner is notified when appropriate.
-
-**Invitation deletion**:
-An Owner-initiated removal that immediately ends public availability and enters a 30-day recovery period before permanent deletion of customer-facing data.
-
-Restoring during recovery restores the Invitation and its retained data without extending its hosting entitlement.
-
-**Unavailable invitation**:
-The neutral public state shown when an Invitation is unpublished, expired, deleted, or otherwise not eligible for public viewing. It does not reveal the underlying cause.
-
-**Share-by-link invitation**:
-An Invitation intended to be reached through a link shared by the Owner, not through search results, a public Vowly directory, or automated guest messaging.
+## Media and responsibility
 
 **Media retention**:
-Media remains available while any Published invitation references it, even if the Owner removes it from the Draft invitation.
-
-**Event archive**:
-The non-destructive removal of an Event from active invitation use while preserving its responses and reporting history. An archived Event cannot accept new RSVPs.
-
-Historical responses for an archived Event are viewable and exportable but not editable.
-
-**Additive guest import**:
-A CSV import that validates and previews new Guest records without replacing or deleting existing Guests. Potential duplicates are warnings requiring an explicit Owner decision.
-
-When merged, the existing Guest remains canonical; imported non-empty values fill blank fields only unless the Owner explicitly resolves a conflict. Invalid rows are reported rather than silently discarded.
-
-**Owner export**:
-A CSV export of operational Guest and RSVP data available to the Owner. It excludes personalized-link secrets, payment secrets, and storage internals, and each export is audited.
-
-**RSVP cutoff**:
-The start of an Event in that Event's local time zone. Personalized RSVP responses become read-only at the cutoff while remaining available for history and export.
-
-**Guest archive**:
-The non-destructive removal of a Guest from active guest operations. It revokes the Guest's Personalized link and prevents new responses while retaining RSVP history.
-
-**Section removal**:
-Removing a section from the Draft invitation's presentation without deleting the data owned by that section. Re-adding the section restores access to retained data; permanent deletion is a separate explicit action.
-
-**Visual editor**:
-The Owner-facing editor for composing an Invitation through a visual, responsive representation of its structured content.
-
-**Section**:
-An ordered top-level container in an Invitation. A Section groups related Content blocks and can be added, reordered, duplicated, hidden, or removed.
-
-**Content block**:
-A typed item inside a Section, such as text, image, quote, button, divider, or Grid block. Content blocks follow the rules of their containing Section and template.
-
-**Grid block**:
-A responsive preset for arranging multiple Content blocks in columns that reflow on smaller screens. It is not a freeform canvas or arbitrary coordinate system.
-
-**Animation preset**:
-A curated visual entrance or emphasis behavior applied to an eligible Section or Content block. It has a reduced-motion-safe behavior and does not contain arbitrary user JavaScript.
-
-**Preview viewport**:
-An Owner-selected responsive presentation size for checking an Invitation at mobile, tablet, or desktop dimensions before publication.
-
-**Cover interaction**:
-An optional, accessible opening step before the main Invitation content. It may require an explicit Open invitation action but cannot prevent keyboard, screen-reader, or direct access to critical content.
+Media remains available while any Published invitation version references it, even if the Owner removes it from the Draft.
 
 **Display-only gifts**:
 Owner-entered QRIS and bank details shown to visitors without Vowly receiving, verifying, or reconciling a payment.
 
 **Content responsibility**:
-The Owner's responsibility to have the rights and consent needed to publish uploaded media and public contact or gift details. Vowly provides validation, support, and takedown handling but does not pre-clear every upload.
+The Owner's responsibility to have the rights and consent needed to publish uploaded media and public Contact or gift details.
 
-**Guestbook report**:
-A visitor's request for review of an inappropriate Guestbook message. The report is private and sends the message to moderation without exposing the reporter publicly.
+## Administration and operations
 
-**Account deletion**:
-The removal of a User after all owned Invitations have completed their recovery/privacy lifecycles. Required payment, audit, and backup records may remain under their own retention rules.
+**Support access**:
+An Admin's intentional access to an Owner's Invitation for a stated operational reason. Support access is read-only by default and audited, with mutations recorded separately.
 
-**Automated notification**:
-A platform message needed for account access, payment, or entitlement/publication status. Guest invitations, RSVP reminders, guestbook notifications, and marketing messages are not launch notifications.
+**Admin intervention**:
+An audited Admin action that makes an Invitation unavailable for abuse, legal, security, or operational reasons while preserving Owner data. The Owner is notified when appropriate.
 
-## Regional defaults
+**Owner export**:
+A CSV export of operational Guest and RSVP data available to the Owner. It excludes Personalized-link secrets, payment secrets, and storage internals, and each export is audited.
+
+## Regional defaults and constraints
 
 **Launch locale**:
-Indonesian (`id-ID`) presentation for customer-facing copy, dates, times, and numbers. The product remains translation-ready for future English support.
-
-**Launch currency**:
-Indonesian rupiah (IDR), the only customer-facing currency in the MVP.
-
-**Contact person**:
-A person the Owner explicitly chooses to expose for invitation-related contact, with an optional phone or WhatsApp link.
-
-Contact details are public only when the Owner enables the contact.
+Indonesian (id-ID) presentation for customer-facing copy, dates, times, and numbers. The product remains translation-ready for future English support.
 
 **Navigation link**:
 An Owner-provided external map or navigation URL associated with a venue. Vowly does not own or embed the map experience in the MVP.
 
-## Launch constraints
-
 **Accessibility target**:
-WCAG 2.2 AA for platform UI, the Owner editor, public Invitation pages, RSVP forms, and Guestbook forms, including keyboard alternatives for drag interactions.
+WCAG 2.2 AA for platform UI, the Owner editor, public Invitation pages, RSVP forms, and Guestbook forms, including keyboard alternatives for pointer interactions.
 
 **Backup expectation**:
 Daily database and media backups retained for 30 days, with documented restore procedures and a restore test before launch. Vowly does not promise an unmeasured customer-facing RPO or RTO in the MVP.

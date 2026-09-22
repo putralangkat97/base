@@ -1,3 +1,5 @@
-# Use a constrained visual section and block editor
+# Superseded: use a constrained visual section and block editor
 
-Vowly provides a visual editor with an ordered hierarchy of Sections and typed Content blocks, responsive Grid blocks, curated Animation presets, and mobile/tablet/desktop Preview viewports. It deliberately does not provide a freeform Figma-style coordinate canvas, arbitrary nested layout, custom CSS/HTML/JavaScript, or user-authored animation timelines; the constraint keeps published invitations responsive, accessible, secure, and renderable across devices.
+This decision is superseded by ADR 0018. The MVP still uses a constrained responsive document model, but the intended interaction is now a more direct, Figma-like visual editor with Sections, Containers, Grid layouts, Content blocks, styles, Animation presets, Music, and fixed Form blocks.
+
+The MVP continues to exclude arbitrary HTML, CSS, JavaScript, embeds, user-authored animation timelines, and unrestricted pixel-coordinate placement.
